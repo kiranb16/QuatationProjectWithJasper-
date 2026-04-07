@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quotation App</title>
+</head>
+<body>
+
+<h2>Create Quotation</h2>
+
+Customer Name:
+<input type="text" id="customerName"><br><br>
+
+<h3>Items</h3>
+
+<table id="itemsTable" border="1">
+    <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Qty</th>
+    </tr>
+</table>
+
+<button onclick="addRow()">Add Item</button><br><br>
+
+<button onclick="saveQuotation()">Save Quotation</button>
+
+<script>
+
+function addRow() {
+    let table = document.getElementById("itemsTable");
+    let row = table.insertRow();
+
+    row.insertCell(0).innerHTML = '<input type="text">';
+    row.insertCell(1).innerHTML = '<input type="number">';
+    row.insertCell(2).innerHTML = '<input type="number">';
+}
+
+function saveQuotation() {
+
+    let customerName = document.getElementById("customerName").value;
+    let table = document.getElementById("itemsTable");
+
+    let items = [];
+
+    for (let i = 1; i < table.rows.length; i++) {
+        let cells = table.rows[i].cells;
+
+        items.push({
+            productName: cells[0].children[0].value,
+            price: cells[1].children[0].value,
+            quantity: cells[2].children[0].value
+        });
+    }
+
+    fetch("http://localhost:8080/quotation/save", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            customerName: customerName,
+            items: items
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Saved! ID: " + data.id);
+
+        // Download PDF
+        window.open("http://localhost:8080/quotation/pdf/" + data.id);
+    });
+}
+
+</script>
+
+</body>
+</html>
